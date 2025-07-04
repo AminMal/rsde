@@ -1,13 +1,30 @@
 pub mod expr;
+pub mod lex;
 
-use crate::expr::syntax::*;
+use lex::SubExpr;
+use expr::syntax::*;
 
 fn main() {
-    let mulex = num(2).mul(num(3));
-    let ex = num(1).add(num(3)).mul(E).sub(mulex.clone());
-    let is_effectively_const = ex.is_effectively_constant();
+    let expr_str = "1 + 25 * 3 / 2sin(x) * e";
     
-    dbg!(ex);
-    dbg!(mulex);
-    println!("{is_effectively_const}")
+    let tokens = lex::tokenize(expr_str.into());
+    
+    assert_eq!(&tokens, &vec![
+        SubExpr::S(num(1)),
+        SubExpr::Plus,
+        SubExpr::S(num(25)),
+        SubExpr::Mul,
+        SubExpr::S(num(3)),
+        SubExpr::Div,
+        SubExpr::S(num(2)),
+        SubExpr::Mul,
+        SubExpr::F("sin".into()),
+        SubExpr::OpenPar,
+        SubExpr::S(var('x')),
+        SubExpr::ClosePar,
+        SubExpr::Mul,
+        SubExpr::S(E)
+    ]);
+    
+    dbg!(tokens);
 }

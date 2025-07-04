@@ -9,6 +9,10 @@ pub mod syntax {
 
     pub const E: Expr = Expr::E;
     
+    pub fn var(name: char) -> Expr {
+        Expr::Var(name)
+    }
+    
     impl Expr {
         pub fn add(self, that: Expr) -> Self {
             Expr::Add(Box::new(self), Box::new(that))

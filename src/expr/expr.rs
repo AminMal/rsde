@@ -1,7 +1,8 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     Const(u64),
     E,
+    Var(char),
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),
     Mul(Box<Expr>, Box<Expr>),
@@ -22,7 +23,7 @@ impl Expr {
             Expr::Div(dividend, divisor) => dividend.is_effectively_constant() && divisor.is_effectively_constant(),
             Expr::Pow(base, exponent) => base.is_effectively_constant() && exponent.is_effectively_constant(),
             Expr::Neg(e) => e.is_effectively_constant(),
-            Expr::Func(_, _) => false
+            _                        => false
         }
     }
 }
