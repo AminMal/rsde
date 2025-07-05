@@ -1,7 +1,11 @@
 pub mod expr;
 mod simplify;
+mod derivative;
+
+use derivative::Derivative;
 
 pub mod syntax {
+    use crate::expr::derivative::Derivative;
     use crate::expr::simplify::simplify;
     use crate::expr::Expr;
 
@@ -45,6 +49,10 @@ pub mod syntax {
 
         pub fn simplified(self) -> Self {
             simplify(self)
+        }
+        
+        pub fn derivative(&self) -> Derivative {
+            Derivative{ expr: self }
         }
     }
 }
