@@ -14,11 +14,15 @@ fn main() {
         Ok(expr) => {
             let simple = expr.simplified();
             let vars = HashMap::from([('x', 1.0)]);
-            let der = simple.derivative().with_respect_to('x').unwrap().simplified();
-            println!("value at point x = 1 is: {}", simple.solve_for(&vars).unwrap());
-            dbg!(&der);
-            println!("derivative of expression at point x = 1 is {}", der.solve_for(&vars).unwrap());
-            dbg!(simple);
+            let der = simple
+                .derivative()
+                .with_respect_to('x')
+                .unwrap()
+                .simplified();
+            println!(
+                "value of derivative at point x = 1 is: {}",
+                der.solve_for(&vars).unwrap()
+            );
         }
         Err(err) => {
             println!("{err}");

@@ -1,6 +1,6 @@
+mod derivative;
 pub mod expr;
 mod simplify;
-mod derivative;
 
 use derivative::Derivative;
 
@@ -50,9 +50,9 @@ pub mod syntax {
         pub fn simplified(self) -> Self {
             simplify(self)
         }
-        
+
         pub fn derivative(&self) -> Derivative {
-            Derivative{ expr: self }
+            Derivative { expr: self }
         }
     }
 }
