@@ -1,7 +1,9 @@
 pub mod expr;
+mod simplify;
 
 pub mod syntax {
     use crate::expr::Expr;
+    use crate::expr::simplify::simplify;
 
     pub fn num(n: u64) -> Expr {
         Expr::Const(n)
@@ -32,6 +34,17 @@ pub mod syntax {
 
         pub fn pow(self, that: Expr) -> Self {
             Expr::Pow(Box::new(self), Box::new(that))
+        }
+        
+        pub fn neg(self) -> Self {
+            match self {
+                Expr::Neg(inner) => *inner,
+                _                           => Expr::Neg(Box::new(self))
+            }
+        }
+        
+        pub fn simplified(self) -> Self {
+            simplify(self)
         }
     }
 }

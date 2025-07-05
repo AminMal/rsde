@@ -2,19 +2,22 @@ pub mod expr;
 pub mod lex;
 pub mod parser;
 
-use lex::SubExpr;
-use expr::syntax::*;
+use std::time::Instant;
 
 fn main() {
-    let expr_str = "1 + 25 * 3 / 2sin(x) * e";
-    
-    let tokens = lex::tokenize(expr_str.into());
-    
-    println!("-----------");
-    let result = parser::parse(tokens);
+    let start = Instant::now();
+    let expr_str = "2^30(x)^2 / 3^4sin(x) + 2a";
+    let result = parser::parse_str(expr_str.into());
+
     match result {
-        Ok(expr) => { dbg!(expr); },
+        Ok(expr) => {
+            let simple = expr.simplified();
+            dbg!(simple);
+        },
         Err(err) => { println!("{err}"); }
     }
-    
+    let end = Instant::now();
+    let dur = end.duration_since(start);
+    println!("It took {:?} to complete", dur);
+
 }

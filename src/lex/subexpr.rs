@@ -1,4 +1,3 @@
-use std::fmt::{Display, Formatter};
 use crate::expr::Expr;
 
 #[derive(Debug, PartialEq, Clone)]

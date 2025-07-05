@@ -142,11 +142,15 @@ pub fn parse(tokens: Vec<SubExpr>) -> Result<Expr, String> {
         }
     }
     
-    dbg!(&remaining_tokens);
     if let [SubExpr::S(e)] = &remaining_tokens[..] {
         Ok(e.clone())
     } else {
         Err("Something went wrong".into())
     }
-    
+}
+
+pub fn parse_str(s: String) -> Result<Expr, String> {
+    use crate::lex;
+    let tokens = lex::tokenize(s);
+    parse(tokens)
 }
