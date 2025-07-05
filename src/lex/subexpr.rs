@@ -10,5 +10,5 @@ pub enum SubExpr {
     Minus,
     Mul,
     Div,
-    Pow
+    Pow,
 }

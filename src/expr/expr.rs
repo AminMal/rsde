@@ -20,10 +20,14 @@ impl Expr {
             Expr::Add(lhs, rhs) => lhs.is_effectively_constant() && rhs.is_effectively_constant(),
             Expr::Sub(lhs, rhs) => lhs.is_effectively_constant() && rhs.is_effectively_constant(),
             Expr::Mul(lhs, rhs) => lhs.is_effectively_constant() && rhs.is_effectively_constant(),
-            Expr::Div(dividend, divisor) => dividend.is_effectively_constant() && divisor.is_effectively_constant(),
-            Expr::Pow(base, exponent) => base.is_effectively_constant() && exponent.is_effectively_constant(),
+            Expr::Div(dividend, divisor) => {
+                dividend.is_effectively_constant() && divisor.is_effectively_constant()
+            }
+            Expr::Pow(base, exponent) => {
+                base.is_effectively_constant() && exponent.is_effectively_constant()
+            }
             Expr::Neg(e) => e.is_effectively_constant(),
-            _                        => false
+            _ => false,
         }
     }
 }

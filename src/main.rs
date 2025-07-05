@@ -13,11 +13,12 @@ fn main() {
         Ok(expr) => {
             let simple = expr.simplified();
             dbg!(simple);
-        },
-        Err(err) => { println!("{err}"); }
+        }
+        Err(err) => {
+            println!("{err}");
+        }
     }
     let end = Instant::now();
     let dur = end.duration_since(start);
     println!("It took {:?} to complete", dur);
-
 }
