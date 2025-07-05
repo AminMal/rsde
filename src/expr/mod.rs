@@ -20,15 +20,15 @@ pub mod syntax {
     }
 
     impl Expr {
-        pub fn add(self, that: Expr) -> Self {
+        pub fn plus(self, that: Expr) -> Self {
             Expr::Add(Box::new(self), Box::new(that))
         }
 
-        pub fn sub(self, that: Expr) -> Self {
+        pub fn minus(self, that: Expr) -> Self {
             Expr::Sub(Box::new(self), Box::new(that))
         }
 
-        pub fn mul(self, that: Expr) -> Self {
+        pub fn times(self, that: Expr) -> Self {
             Expr::Mul(Box::new(self), Box::new(that))
         }
 
