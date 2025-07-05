@@ -2,8 +2,6 @@ mod derivative;
 pub mod expr;
 mod simplify;
 
-use derivative::Derivative;
-
 pub mod syntax {
     use crate::expr::derivative::Derivative;
     use crate::expr::simplify::simplify;
@@ -18,6 +16,12 @@ pub mod syntax {
     pub fn var(name: char) -> Expr {
         Expr::Var(name)
     }
+    
+    pub fn func<T: Into<String>>(name: T, arg: Expr) -> Expr {
+        Expr::Func(name.into(), Box::new(arg))
+    }
+    
+    pub const X: Expr = Expr::Var('x');
 
     impl Expr {
         pub fn plus(self, that: Expr) -> Self {

@@ -7,6 +7,7 @@ pub fn simplify(expr: Expr) -> Expr {
         Expr::Neg(inner) if matches!(*inner, Expr::Neg(_)) => inner.neg(),
         Expr::Add(lhs, rhs) if matches!(*rhs, Expr::Neg(_)) => Expr::Sub(lhs, Box::new(rhs.neg())),
         Expr::Add(lhs, rhs) if matches!(*lhs, Expr::Neg(_)) => Expr::Sub(rhs, Box::new(lhs.neg())),
+        Expr::Sub(lhs, rhs) if *lhs == *rhs => Expr::Const(0),
         Expr::Sub(lhs, rhs) if matches!(*rhs, Expr::Neg(_)) => Expr::Add(lhs, Box::new(rhs.neg())),
         Expr::Add(lhs, rhs) => {
             let lhs_simplified = simplify(*lhs);
@@ -154,6 +155,95 @@ mod tests {
             Ok(())
         } else {
             Err("subtraction of negated arg did not equal sub".into())
+        }
+    }
+    
+    #[test]
+    fn expr_minus_self_is_0() -> Result<(), String> {
+        let common = num(110).plus(num(2).times(X).plus(num(77)));
+        let expr = simplify(common.clone().minus(common));
+        let expected = num(0);
+        
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("expression minus itself did not equal 0".into())
+        }
+        
+    }
+    
+    #[test]
+    fn to_pow_1_is_self() -> Result<(), String> {
+        // (x + 2)^1 => x + 2
+        let expr = simplify(X.plus(num(2)).pow(num(1)));
+        let expected = X.plus(num(2));
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("Expr to the power of 1 did not equal the expression itself".into())
+        }
+    }
+
+    #[test]
+    fn to_pow_0_is_1() -> Result<(), String> {
+        // (x + 2)^1 => x + 2
+        let expr = simplify(X.plus(num(2)).pow(num(0)));
+        let expected = num(1);
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("Expr to the power of 0 did not equal Const(1)".into())
+        }
+    }
+
+    #[test]
+    fn _1_to_pow_anything_is_1() -> Result<(), String> {
+        // 1^(x+e) => 1
+        let expr = simplify(num(1).pow(X.plus(E)));
+        let expected = num(1);
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("1 to the power of expression did not equal 1".into())
+        }
+    }
+
+    #[test]
+    fn _0_to_pow_anything_is_0() -> Result<(), String> {
+        // 0^(x+e) => 0
+        let expr = simplify(num(0).pow(X.plus(E)));
+        let expected = num(0);
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("0 to the power of some expression did not equal 0".into())
+        }
+    }
+
+    #[test]
+    fn anything_divided_by_itself_is_1() -> Result<(), String> {
+        // (x+e)*(109+110)/(x+e)*(109+110) => 1
+        let common_expr = (X.plus(E)).times(num(109).plus(num(110)));
+        let expr = simplify(common_expr.clone().div(common_expr));
+        let expected = num(1);
+        if expr == expected {
+            Ok(())
+        } else {
+            Err("expression divided by itself did not equal 1".into())
+        }
+    }
+    
+    #[test]
+    fn func_arg_should_be_simplified() -> Result<(), String> {
+        // fnc(109-109+10) => fnc(10)
+        let expr = simplify(func("fnc", num(109).minus(num(109)).plus(num(10))));
+        let expected = func("fnc", num(10));
+        
+        if expr == expected {
+            Ok(())
+        } else {
+            dbg!(expr);
+            Err("function arguments not simplified".into())
         }
     }
 }
