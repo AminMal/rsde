@@ -10,13 +10,8 @@ impl<'a> Derivative<'a> {
             Ok(Expr::Const(0))
         } else {
             match self.expr {
-                Expr::Var(v) => {
-                    if *v == var {
-                        Ok(Expr::Const(1))
-                    } else {
-                        Err("derivative of other variables with respect to another variable has not been implemented yet".into())
-                    }
-                }
+                Expr::Var(v) if *v == var => Ok(Expr::Const(1)),
+                Expr::Var(_) => Err("derivative of other variables with respect to another variable has not been implemented yet".into()),
                 Expr::Neg(e) => {
                     let e_der = Self { expr: e.as_ref() };
                     Ok(Expr::Neg(Box::new(e_der.with_respect_to(var)?)))
