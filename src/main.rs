@@ -1,5 +1,6 @@
 pub mod expr;
 pub mod lex;
+pub mod parser;
 
 use lex::SubExpr;
 use expr::syntax::*;
@@ -9,22 +10,11 @@ fn main() {
     
     let tokens = lex::tokenize(expr_str.into());
     
-    assert_eq!(&tokens, &vec![
-        SubExpr::S(num(1)),
-        SubExpr::Plus,
-        SubExpr::S(num(25)),
-        SubExpr::Mul,
-        SubExpr::S(num(3)),
-        SubExpr::Div,
-        SubExpr::S(num(2)),
-        SubExpr::Mul,
-        SubExpr::F("sin".into()),
-        SubExpr::OpenPar,
-        SubExpr::S(var('x')),
-        SubExpr::ClosePar,
-        SubExpr::Mul,
-        SubExpr::S(E)
-    ]);
+    println!("-----------");
+    let result = parser::parse(tokens);
+    match result {
+        Ok(expr) => { dbg!(expr); },
+        Err(err) => { println!("{err}"); }
+    }
     
-    dbg!(tokens);
 }
