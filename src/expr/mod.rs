@@ -5,7 +5,7 @@ pub mod syntax {
     use crate::expr::simplify::simplify;
     use crate::expr::Expr;
 
-    pub fn num(n: u64) -> Expr {
+    pub fn num(n: u32) -> Expr {
         Expr::Const(n)
     }
 

@@ -2,16 +2,19 @@ pub mod expr;
 pub mod lex;
 pub mod parser;
 
+use std::collections::HashMap;
 use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
-    let expr_str = "2^30(x)^2 / 3^4sin(x) + 2a";
+    let expr_str = "2^30(x)^2 / 3^4sin(x) + 2x";
     let result = parser::parse_str(expr_str.into());
 
     match result {
         Ok(expr) => {
             let simple = expr.simplified();
+            let vars = HashMap::from([('x', 1.0)]);
+            println!("value at point x = 1 is: {}", simple.solve_for(&vars).unwrap());
             dbg!(simple);
         }
         Err(err) => {

@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
-    Const(u64),
+    Const(u32),
     E,
     Var(char),
     Add(Box<Expr>, Box<Expr>),
@@ -28,6 +30,29 @@ impl Expr {
             }
             Expr::Neg(e) => e.is_effectively_constant(),
             _ => false,
+        }
+    }
+    
+    pub fn solve_for(&self, vars: &HashMap<char, f64>) -> Result<f64, String> {
+        match self {
+            Expr::Const(n) => Ok(f64::from(*n)),
+            Expr::Var(name) => vars.get(name).map(|&x| x).ok_or(format!("could not find variable [{}]", name)),
+            Expr::E => Ok(std::f64::consts::E),
+            Expr::Add(lhs, rhs) => Ok(lhs.solve_for(&vars)? + rhs.solve_for(&vars)?),
+            Expr::Sub(lhs, rhs) => Ok(lhs.solve_for(&vars)? - rhs.solve_for(&vars)?),
+            Expr::Mul(lhs, rhs) => Ok(lhs.solve_for(&vars)? * rhs.solve_for(&vars)?),
+            Expr::Div(lhs, rhs) => Ok(lhs.solve_for(&vars)? / rhs.solve_for(&vars)?),
+            Expr::Pow(lhs, rhs) => Ok(lhs.solve_for(&vars)?.powf(rhs.solve_for(&vars)?)),
+            Expr::Neg(e) => Ok(-(e.solve_for(&vars)?)),
+            Expr::Func(name, arg) => {
+                match name.as_str() {
+                    "sin" => Ok(arg.solve_for(&vars)?.sin()),
+                    "cos" => Ok(arg.solve_for(&vars)?.cos()),
+                    "tan" => Ok(arg.solve_for(&vars)?.tan()),
+                    "cot" => Ok(1.0 / arg.solve_for(&vars)?.tan()),
+                    other => Err(format!("Unrecognized function [{}({:?})]", name, arg))
+                }
+            }
         }
     }
 }

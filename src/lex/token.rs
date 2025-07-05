@@ -4,7 +4,7 @@ use crate::lex::subexpr::SubExpr;
 // TODO, completely unsafe module here, refactor later
 
 // TODO, fix this
-fn unsafe_char_to_64(c: char) -> u64 {
+fn unsafe_char_to_u32(c: char) -> u32 {
     match c {
         '0' => 0,
         '1' => 1,
@@ -59,8 +59,8 @@ pub fn tokenize(s: String) -> Vec<SubExpr> {
                 let num = fold_right_while(
                     &mut chars,
                     |x| x.is_numeric(),
-                    unsafe_char_to_64(c),
-                    |(n, &elem)| n * 10 + unsafe_char_to_64(elem),
+                    unsafe_char_to_u32(c),
+                    |(n, &elem)| n * 10 + unsafe_char_to_u32(elem),
                 );
                 sub_expressions.push(SubExpr::S(Expr::Const(num)));
                 // if next is a variable, a function, or parenthesis, then that implicitly means multiplication:
