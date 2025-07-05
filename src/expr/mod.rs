@@ -21,6 +21,18 @@ pub mod syntax {
         Expr::Func(name.into(), Box::new(arg))
     }
     
+    pub fn sin(arg: Expr) -> Expr {
+        func("sin", arg)
+    }
+
+    pub fn cos(arg: Expr) -> Expr {
+        func("cos", arg)
+    }
+
+    pub fn tan(arg: Expr) -> Expr {
+        func("tan", arg)
+    }
+    
     pub const X: Expr = Expr::Var('x');
 
     impl Expr {

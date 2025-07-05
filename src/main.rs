@@ -12,9 +12,8 @@ fn main() {
 
     match result {
         Ok(expr) => {
-            let simple = expr.simplified();
             let vars = HashMap::from([('x', 1.0)]);
-            let der = simple
+            let der = expr
                 .derivative()
                 .with_respect_to('x')
                 .unwrap()

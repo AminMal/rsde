@@ -29,6 +29,7 @@ impl Expr {
                 base.is_effectively_constant() && exponent.is_effectively_constant()
             }
             Expr::Neg(e) => e.is_effectively_constant(),
+            Expr::Func(_, arg) => arg.is_effectively_constant(),
             _ => false,
         }
     }
