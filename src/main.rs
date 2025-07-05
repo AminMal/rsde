@@ -7,7 +7,7 @@ use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
-    let expr_str = "2^10(x)^2 / (3^4)*x + 2x";
+    let expr_str = "2^10(x)^2 / 3^4x + 2x";
     let result = parser::parse_str(expr_str.into());
 
     match result {
