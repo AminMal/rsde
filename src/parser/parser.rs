@@ -117,6 +117,6 @@ pub fn parse(tokens: Vec<SubExpr>) -> Result<Expr, String> {
 
 pub fn parse_str(s: String) -> Result<Expr, String> {
     use crate::lex;
-    let tokens = lex::tokenize(s);
+    let tokens = lex::tokenize(s)?;
     parse(tokens)
 }

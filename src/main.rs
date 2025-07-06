@@ -1,9 +1,7 @@
-pub mod expr;
-pub mod lex;
-pub mod parser;
-
 use std::collections::HashMap;
 use std::time::Instant;
+
+use rsde::parser;
 
 fn main() {
     let start = Instant::now();
@@ -13,11 +11,7 @@ fn main() {
     match result {
         Ok(expr) => {
             let vars = HashMap::from([('x', 1.0)]);
-            let der = expr
-                .derivative()
-                .with_respect_to('x')
-                .unwrap()
-                .simplified();
+            let der = expr.derivative().with_respect_to('x').unwrap().simplified();
             println!(
                 "value of derivative at point x = 1 is: {}",
                 der.solve_for(&vars).unwrap()

@@ -16,11 +16,11 @@ pub mod syntax {
     pub fn var(name: char) -> Expr {
         Expr::Var(name)
     }
-    
+
     pub fn func<T: Into<String>>(name: T, arg: Expr) -> Expr {
         Expr::Func(name.into(), Box::new(arg))
     }
-    
+
     pub fn sin(arg: Expr) -> Expr {
         func("sin", arg)
     }
@@ -32,7 +32,7 @@ pub mod syntax {
     pub fn tan(arg: Expr) -> Expr {
         func("tan", arg)
     }
-    
+
     pub const X: Expr = Expr::Var('x');
 
     impl Expr {

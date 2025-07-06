@@ -67,9 +67,9 @@ pub fn simplify(expr: Expr) -> Expr {
 
 #[cfg(test)]
 mod tests {
-    
+
     use super::*;
-    use crate::expr::{Expr, syntax::*};
+    use crate::expr::{syntax::*, Expr};
 
     #[test]
     fn test_add_0_is_self() -> Result<(), String> {
@@ -100,7 +100,7 @@ mod tests {
             Err(format!("{:?} did not equal Const(12)", expr))
         }
     }
-    
+
     #[test]
     fn neg_of_neg_is_self() -> Result<(), String> {
         let expr = simplify(num(65).times(num(12).minus(num(6))));
@@ -111,7 +111,7 @@ mod tests {
             Err("double negation did not equal self!".into())
         }
     }
-    
+
     #[test]
     fn neg_of_0_is_0() -> Result<(), String> {
         let expr = simplify(Expr::Neg(Box::new(num(0))));
@@ -121,7 +121,7 @@ mod tests {
             Err("Neg of 0 did not equal Const(0)".into())
         }
     }
-    
+
     // 3 + (-2) => 3 - 2
     #[test]
     fn add_of_negated_rhs_is_sub() -> Result<(), String> {
@@ -145,7 +145,7 @@ mod tests {
             Err("add of negated arg did not equal sub".into())
         }
     }
-    
+
     // 2 - -(3) => 2 + 3
     #[test]
     fn sub_of_negated_rhs_is_add() -> Result<(), String> {
@@ -157,21 +157,20 @@ mod tests {
             Err("subtraction of negated arg did not equal sub".into())
         }
     }
-    
+
     #[test]
     fn expr_minus_self_is_0() -> Result<(), String> {
         let common = num(110).plus(num(2).times(X).plus(num(77)));
         let expr = simplify(common.clone().minus(common));
         let expected = num(0);
-        
+
         if expr == expected {
             Ok(())
         } else {
             Err("expression minus itself did not equal 0".into())
         }
-        
     }
-    
+
     #[test]
     fn to_pow_1_is_self() -> Result<(), String> {
         // (x + 2)^1 => x + 2
@@ -232,13 +231,13 @@ mod tests {
             Err("expression divided by itself did not equal 1".into())
         }
     }
-    
+
     #[test]
     fn func_arg_should_be_simplified() -> Result<(), String> {
         // fnc(109-109+10) => fnc(10)
         let expr = simplify(func("fnc", num(109).minus(num(109)).plus(num(10))));
         let expected = func("fnc", num(10));
-        
+
         if expr == expected {
             Ok(())
         } else {

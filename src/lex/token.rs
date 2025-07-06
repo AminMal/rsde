@@ -1,5 +1,6 @@
 use crate::expr::Expr;
 use crate::lex::subexpr::SubExpr;
+use std::collections::VecDeque;
 
 // TODO, completely unsafe module here, refactor later
 
@@ -22,30 +23,30 @@ fn unsafe_char_to_u32(c: char) -> u32 {
     }
 }
 
-fn fold_right_while<T, Z, P, F>(l: &mut Vec<T>, p: P, zero: Z, f: F) -> Z
+fn fold_while<T, Z, P, F>(l: &mut VecDeque<T>, p: P, zero: Z, f: F) -> Z
 where
     P: Fn(&T) -> bool,
     F: Fn((Z, &T)) -> Z,
 {
     let mut result: Z = zero;
-    let len_matching_condition = l.iter().rev().take_while(|&x| p(x)).count();
+    let len_matching_condition = l.iter().take_while(|&x| p(x)).count();
     for _ in 0..len_matching_condition {
-        let elem = l.pop().unwrap();
+        let elem = l.pop_front().unwrap();
         result = f((result, &elem));
     }
     result
 }
 
-fn trimmed_chars(s: String) -> Vec<char> {
-    s.replace(" ", "").chars().rev().collect()
+fn trimmed_chars(s: String) -> VecDeque<char> {
+    s.replace(" ", "").chars().collect()
 }
 
-pub fn tokenize(s: String) -> Vec<SubExpr> {
+pub fn tokenize(s: String) -> Result<Vec<SubExpr>, String> {
     let mut chars = trimmed_chars(s);
     let mut sub_expressions: Vec<SubExpr> = Vec::new();
 
     while !chars.is_empty() {
-        let next = chars.pop().unwrap();
+        let next = chars.pop_front().ok_or("expected next char")?;
         match next {
             '^' => sub_expressions.push(SubExpr::Pow),
             '*' => sub_expressions.push(SubExpr::Mul),
@@ -56,7 +57,7 @@ pub fn tokenize(s: String) -> Vec<SubExpr> {
             '/' => sub_expressions.push(SubExpr::Div),
             // nums
             c if c.is_numeric() => {
-                let num = fold_right_while(
+                let num = fold_while(
                     &mut chars,
                     |x| x.is_numeric(),
                     unsafe_char_to_u32(c),
@@ -64,17 +65,17 @@ pub fn tokenize(s: String) -> Vec<SubExpr> {
                 );
                 sub_expressions.push(SubExpr::S(Expr::Const(num)));
                 // if next is a variable, a function, or parenthesis, then that implicitly means multiplication:
-                match chars.last() {
+                match chars.get(0) {
                     Some(&x) => {
                         if x.is_alphabetic() || x == '(' {
-                            chars.push('*');
+                            chars.push_front('*');
                         }
                     }
                     None => (),
                 }
             }
             a if a.is_alphabetic() => {
-                let next = chars.last();
+                let next = chars.get(0);
                 let next_is_alphabetic = next.is_some_and(|x| x.is_alphabetic());
                 let next_is_paren = next.is_some_and(|&x| x == '(');
                 // vars and e
@@ -86,7 +87,7 @@ pub fn tokenize(s: String) -> Vec<SubExpr> {
                     sub_expressions.push(sub_expr)
                 } else {
                     // func symbols
-                    let name = fold_right_while(
+                    let name = fold_while(
                         &mut chars,
                         |x| x.is_alphabetic(),
                         String::from(a),
@@ -101,5 +102,5 @@ pub fn tokenize(s: String) -> Vec<SubExpr> {
         }
     }
 
-    sub_expressions
+    Ok(sub_expressions)
 }
