@@ -1,4 +1,5 @@
 use rsde::expr::Expr;
+use rsde::out::*;
 use rsde::parser;
 use std::collections::{HashMap, VecDeque};
 use std::env::args;
@@ -13,6 +14,7 @@ struct ApplicationArgs {
     derivative_over: Option<char>,
     simplify: bool,
     vars: HashMap<char, f64>,
+    out: Box<dyn Out>,
 }
 
 impl ApplicationArgs {
@@ -35,6 +37,10 @@ impl ApplicationArgs {
     fn over(&mut self, var: char) {
         self.derivative_over = Some(var);
     }
+
+    fn out(&mut self, output: Box<dyn Out>) {
+        self.out = output;
+    }
 }
 
 fn parse_var(key_value_pair: String) -> Result<(char, f64), String> {
@@ -55,6 +61,7 @@ fn parse_app_args() -> Result<ApplicationArgs, String> {
         derivative_over: None,
         simplify: false,
         vars: HashMap::new(),
+        out: Box::new(standard()),
     };
     let mut a = args().collect::<VecDeque<_>>();
 
@@ -100,6 +107,20 @@ fn parse_app_args() -> Result<ApplicationArgs, String> {
             "--help" | "-h" => {
                 help();
             }
+            "--output" | "-o" => match a.pop_front().unwrap_or(String::default()).as_str() {
+                "standard" => {
+                    result.out(Box::new(standard()));
+                }
+                "latex" => {
+                    result.out(Box::new(latex()));
+                }
+                "" => {
+                    return Err("no output specified, run with --help".into());
+                }
+                other => {
+                    return Err(format!("not a valid output {}", other));
+                }
+            },
             _ => {}
         }
     }
@@ -115,10 +136,11 @@ fn main() -> Result<(), String> {
             derivative: true,
             derivative_over: Some(var),
             vars,
+            out,
             ..
         } => {
             let der = e.derivative().with_respect_to(var)?.simplified();
-            dbg!(&der);
+            println!("derivative formula: {}", out.output(&der)?);
             if vars.contains_key(&var) {
                 let value = der.solve_for(&vars)?;
                 println!("derivative at specified point(s) is {}", value);
@@ -130,9 +152,11 @@ fn main() -> Result<(), String> {
             expr: Some(e),
             derivative: false,
             simplify: true,
+            out,
             ..
         } => {
-            println!("simplified expression:\n {:?}", e.simplified());
+            let simplified = e.simplified();
+            println!("simplified expression:\n{}", out.output(&simplified)?);
             Ok(())
         }
         // solve
