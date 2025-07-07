@@ -2,25 +2,8 @@ use crate::expr::Expr;
 use crate::lex::subexpr::SubExpr;
 use std::collections::VecDeque;
 
-// TODO, completely unsafe module here, refactor later
-
-// TODO, fix this
-fn unsafe_char_to_u32(c: char) -> u32 {
-    match c {
-        '0' => 0,
-        '1' => 1,
-        '2' => 2,
-        '3' => 3,
-        '4' => 4,
-        '5' => 5,
-        '6' => 6,
-        '7' => 7,
-        '8' => 8,
-        '9' => 9,
-        _ => {
-            panic!("not a digit {c}");
-        }
-    }
+fn try_to_digit(c: char) -> Result<u32, String> {
+    c.to_digit(10).ok_or(format!("invalid digit {}", c))
 }
 
 fn fold_while<T, Z, P, F>(l: &mut VecDeque<T>, p: P, zero: Z, f: F) -> Z
@@ -37,6 +20,20 @@ where
     result
 }
 
+fn try_fold_while<T, Z, P, F, E>(l: &mut VecDeque<T>, p: P, zero: Z, f: F) -> Result<Z, E>
+where
+    P: Fn(&T) -> bool,
+    F: Fn((Z, &T)) -> Result<Z, E>,
+{
+    let mut result: Z = zero;
+    let len_matching_condition = l.iter().take_while(|&x| p(x)).count();
+    for _ in 0..len_matching_condition {
+        let elem = l.pop_front().unwrap();
+        result = f((result, &elem))?;
+    }
+    Ok(result)
+}
+
 fn trimmed_chars(s: String) -> VecDeque<char> {
     s.replace(" ", "").chars().collect()
 }
@@ -44,9 +41,8 @@ fn trimmed_chars(s: String) -> VecDeque<char> {
 pub fn tokenize(s: String) -> Result<Vec<SubExpr>, String> {
     let mut chars = trimmed_chars(s);
     let mut sub_expressions: Vec<SubExpr> = Vec::new();
-
-    while !chars.is_empty() {
-        let next = chars.pop_front().ok_or("expected next char")?;
+    
+    while let Some(next) = chars.pop_front() {
         match next {
             '^' => sub_expressions.push(SubExpr::Pow),
             '*' => sub_expressions.push(SubExpr::Mul),
@@ -57,12 +53,12 @@ pub fn tokenize(s: String) -> Result<Vec<SubExpr>, String> {
             '/' => sub_expressions.push(SubExpr::Div),
             // nums
             c if c.is_numeric() => {
-                let num = fold_while(
+                let num = try_fold_while(
                     &mut chars,
                     |x| x.is_numeric(),
-                    unsafe_char_to_u32(c),
-                    |(n, &elem)| n * 10 + unsafe_char_to_u32(elem),
-                );
+                    try_to_digit(c)?,
+                    |(n, &elem)| try_to_digit(elem).map(|d| n * 10 + d),
+                )?;
                 sub_expressions.push(SubExpr::S(Expr::Const(num)));
                 // if next is a variable, a function, or parenthesis, then that implicitly means multiplication:
                 match chars.get(0) {
