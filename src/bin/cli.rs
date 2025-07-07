@@ -3,6 +3,7 @@ use rsde::out::*;
 use rsde::parser;
 use std::collections::{HashMap, VecDeque};
 use std::env::args;
+use std::time::Instant;
 
 fn help() {
     println!("help!");
@@ -15,6 +16,7 @@ struct ApplicationArgs {
     simplify: bool,
     vars: HashMap<char, f64>,
     out: Box<dyn Out>,
+    timed: bool
 }
 
 impl ApplicationArgs {
@@ -41,6 +43,10 @@ impl ApplicationArgs {
     fn out(&mut self, output: Box<dyn Out>) {
         self.out = output;
     }
+    
+    fn time(&mut self, time: bool) {
+        self.timed = time;
+    }
 }
 
 fn parse_var(key_value_pair: String) -> Result<(char, f64), String> {
@@ -62,6 +68,7 @@ fn parse_app_args() -> Result<ApplicationArgs, String> {
         simplify: false,
         vars: HashMap::new(),
         out: Box::new(standard()),
+        timed: false
     };
     let mut a = args().collect::<VecDeque<_>>();
 
@@ -121,6 +128,9 @@ fn parse_app_args() -> Result<ApplicationArgs, String> {
                     return Err(format!("not a valid output {}", other));
                 }
             },
+            "--time" | "--timed" | "-t" => {
+                result.time(true);
+            }
             _ => {}
         }
     }
@@ -129,6 +139,7 @@ fn parse_app_args() -> Result<ApplicationArgs, String> {
 }
 
 fn main() -> Result<(), String> {
+    let start = Instant::now();
     match parse_app_args()? {
         // derivative
         ApplicationArgs {
@@ -137,6 +148,7 @@ fn main() -> Result<(), String> {
             derivative_over: Some(var),
             vars,
             out,
+            timed,
             ..
         } => {
             let der = e.derivative().with_respect_to(var)?.simplified();
@@ -144,6 +156,10 @@ fn main() -> Result<(), String> {
             if vars.contains_key(&var) {
                 let value = der.solve_for(&vars)?;
                 println!("derivative at specified point(s) is {}", value);
+            }
+            if timed {
+                let end = Instant::now();
+                println!("operation took {:?}", end.duration_since(start));
             }
             Ok(())
         }
@@ -153,10 +169,15 @@ fn main() -> Result<(), String> {
             derivative: false,
             simplify: true,
             out,
+            timed,
             ..
         } => {
             let simplified = e.simplified();
             println!("simplified expression:\n{}", out.output(&simplified)?);
+            if timed {
+                let end = Instant::now();
+                println!("operation took {:?}", end.duration_since(start));
+            }
             Ok(())
         }
         // solve
@@ -165,12 +186,17 @@ fn main() -> Result<(), String> {
             derivative: false,
             simplify: false,
             vars,
+            timed,
             ..
         } => {
             println!(
                 "expression value at given point(s) is {}",
                 e.solve_for(&vars)?
             );
+            if timed {
+                let end = Instant::now();
+                println!("operation took {:?}", end.duration_since(start));
+            }
             Ok(())
         }
         _ => Err("unrecognizable CLI args pattern".into()),
